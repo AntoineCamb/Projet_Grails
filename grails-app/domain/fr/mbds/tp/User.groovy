@@ -18,6 +18,7 @@ class User implements Serializable {
     String mail
     String tel
     Date   dob
+    boolean isDeleted
 
     Date dateCreated
     Date lastUpdated
@@ -39,8 +40,7 @@ class User implements Serializable {
         tel nullable: true
         firstName nullable: false, blank: false
         lastName nullable: false, blank: false
-
-
+        isDeleted nullable : false
 
     }
 
