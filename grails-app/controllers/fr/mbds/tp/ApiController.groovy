@@ -115,7 +115,7 @@ class ApiController {
                 if(params.id) // si on a un id, on doit retourner une instance de user
                 {
                     def userInstance = User.get(params.id)
-                    if (userInstance.isDeleted = false){
+                    if (!userInstance.isDeleted){
                         if (userInstance)
                             responseFormat(userInstance, request)
                         else
@@ -164,6 +164,7 @@ class ApiController {
                 if (userInstance)
                 {
                     userInstance.isDeleted = true
+                    userInstance.save(flush:true)
                     response.status = 200
                     return response.status
 
@@ -183,7 +184,7 @@ class ApiController {
         switch (request.getMethod())
         {
             case "GET":
-                responseFormatList(User.list(),request)
+                responseFormatList(User.findAllByIsDeleted(false),request)
                 break
             case "POST":
                 def userInstance
@@ -222,6 +223,9 @@ class ApiController {
                 render list as JSON
                 break
         }
+    }
+    def getListActualisee (List list){
+
     }
 }
 
