@@ -33,26 +33,19 @@ class ApiController {
                 {
                     if (params.get("author.id"))
                     {
-                        def authorInstance = User.get(params.get("author.id"))
+                        def authorInstance = User.get(params.author.id)
                         if (authorInstance)
                             messageInstance.author = authorInstance
                     }
                     if (params.messageContent)
                         messageInstance.messageContent = params.messageContent
-                    if (messageInstance.save(flush:true)) {
-                        response.status = 200
-                        return response.status
-                    }
+                    if (messageInstance.save(flush:true))
+                        response.status=200
                     else
-                    {
-                        response.status = 400
-                        return response.status
-                    }
+                        response.status=400
                 }
-                else
-                {
-                    response.status = 404
-                    return response.status
+                else {
+                    response.status=404
                 }
                 break
             case "DELETE":
@@ -67,12 +60,9 @@ class ApiController {
                     }
                     messageInstance.delete(flush:true)
                     response.status = 200
-                    return response.status
-
                 }
                 else {
                     response.status = 404
-                    return response.status
                 }
                 break
             default:
@@ -97,10 +87,7 @@ class ApiController {
                     messageInstance = new Message(author : authorInstance, messageContent : params.messageContent)
                     if(messageInstance.save(flush:true))
                         response.status=201
-                        return response.status
                 }
-
-
                 if (response.status !=201)
                     response.status = 400
                 break
@@ -171,7 +158,6 @@ class ApiController {
                 }
                 else {
                     response.status = 404
-                    return response.status
                 }
                 break
             default:
@@ -191,7 +177,6 @@ class ApiController {
                 userInstance = new User(username : params.username, password : params.password, firstName : params.firstName, lastName : params.lastName, mail : params.mail)
                 if(userInstance.save(flush:true))
                     response.status=201
-                return response.status
                 if (response.status !=201)
                     response.status = 400
                 break
@@ -224,8 +209,85 @@ class ApiController {
                 break
         }
     }
-    def getListActualisee (List list){
 
+    def messageToUser(){
+        switch (request.getMethod()) {
+            case "POST":
+                if (params.get("user.id")) {
+                    def userInstance = User.get(params.get("user.id"))
+                    if (userInstance) {
+                        def messageInstance
+                        if (params.get("message.id")) {
+                            messageInstance = Message.get(params.get("message.id"))
+                        } else {
+                            def authorInstance = params.get("author.id") ? User.get(params.get("author.id")) : null
+                            if (authorInstance)
+                                messageInstance = new Message(author: authorInstance, messageContent: params.messageContent)
+                                messageInstance.save(flush:true)
+                        }
+                        if(messageInstance) {
+                            def userMessageInstance =  new UserMessage(message: messageInstance, user: userInstance)
+                            if(userMessageInstance.save(flush: true))
+                                response.status=201
+                        } else {
+                            response.status=400
+                        }
+                    } else {
+                        response.status=404
+                    }
+                }
+
+                if (response.status != 201)
+                    response.status = 400
+                    render(text: "Le message n'est pas assigné")
+
+
+            default:
+                response.status = 405
+                break
+        }
+    }
+
+    def messageToGroup() {
+        switch (request.getMethod()) {
+            case "POST":
+                if (params.get("role.id")) {
+                    def roleInstance = Role.get(params.get("role.id"))
+                    def userRoleList = UserRole.findAllByRole(roleInstance)
+                    def userList = userRoleList.collect{ it.user }
+                    if (roleInstance) {
+                        def messageInstance
+                        if (params.get("message.id")) {
+                            messageInstance = Message.get(params.get("message.id"))
+                        } else {
+                            def authorInstance = params.get("author.id") ? User.get(params.get("author.id")) : null
+                            if (authorInstance)
+                                messageInstance = new Message(author: authorInstance, messageContent: params.messageContent)
+                                messageInstance.save(flush:true)
+                        }
+                        if(messageInstance) {
+                            for (user in userList) {
+                                def userMessageInstance =  new UserMessage(message: messageInstance, user: user)
+                                if(userMessageInstance.save(flush: true))
+                                   response.status=201
+                            }
+                        } else {
+                            response.status=400
+                        }
+                    } else {
+                        response.status=404
+                    }
+                }
+
+                if (response.status != 201)
+                    response.status = 400
+                    render(text: "Le message n'est pas assigné")
+
+            default:
+                response.status = 405
+                break
+        }
     }
 }
+
 

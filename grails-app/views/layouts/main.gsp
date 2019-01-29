@@ -33,7 +33,6 @@
                     <li><a href="${g.createLink(controller :'user')}">Users</a></li>
                     <li><a href="${g.createLink(controller :'message')}">Messages</a></li>
                     <li><a href="${g.createLink(controller :'role')}">Groupes</a></li>
-                    <li><a href="${g.createLink(controller :'custom')}">Custom</a></li>
                 </ul>
             </div>
         </div>

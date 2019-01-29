@@ -31,17 +31,15 @@
                 <fieldset class="form">
                     <f:all bean="message"/>
                     <g:select
-                        name="receiver"
+                        name="destinataires"
                         from="${fr.mbds.tp.User.list()}"
                         optionValue="username"
                         optionKey="id"/>
-                    <g:select
-                        name="roles"
-                        from="${fr.mbds.tp.Role.list()}"
-                        optionValue="nomrole"/>
                 </fieldset>
                 <fieldset class="buttons">
-                    <input class="save" type="submit" value="${message(code: 'default.button.update.label', default: 'Update')}" />
+                    <div align="center">
+                        <input class="save" type="submit" value="Editer le message" />
+                    </div>
                 </fieldset>
             </g:form>
         </div>

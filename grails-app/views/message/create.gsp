@@ -31,11 +31,28 @@
                 <div class='fieldcontain required'>
                     <label for='destinataires'> Destinataire(s)
                         <span class='required-indicator'>*</span>
-                    </label><input type="text" name="messageContent" value="" required="" id="destinataires" />
+                    </label>
+                    <g:select name="destinataires"
+                              from="${userList}"
+                              value="${user}"
+                              optionKey="id"
+                              multiple="true"/>
                 </div>
+                <div class='fieldcontain'>
+                    <label for='groupedestinataire'> Groupe(s) </label>
+                        <g:select name="groupedestinataire"
+                              from="${roleList}"
+                              value="${role}"
+                              multiple="true"/>
+                </div>
+
+
                 </fieldset>
                 <fieldset class="buttons">
-                    <g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}" />
+                    <div align="center">
+                        <g:submitButton name="create" class="save" value="Envoi Message" align="center"/>
+                    </div>
+
                 </fieldset>
             </g:form>
         </div>

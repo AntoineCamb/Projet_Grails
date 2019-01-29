@@ -12,10 +12,16 @@ class BootStrap {
         def userAdmin = new User(username:"admin", password:"secret", firstName:"admin", lastName:"admin", mail:"admin", isDeleted:false).save(flush:true,failOnError:true)
         def roleAdmin = new Role(authority:"ROLE_ADMIN").save(flush:true,failOnError:true)
         UserRole.create(userAdmin,roleAdmin,true)
+
+        def userDeleted = new User(username: "userDeleted", password: "passwordDeleted", firstName: "userDeleted", lastName:"deletedUser", mail:"user@deleted.com").save(flush:true, failOnError: true)
+
+        def groupEveryone = new Role(authority: "groupEveryone").save(flush: true, failOnError: true)
+
         (1..50).each{
             def userInstance = new User(username:"username-$it",password:"password",firstName:"first",lastName:"last",mail:"mail-$it", isDeleted:false).save(flush:true,failOnError:true)
-
-            new Message(messageContent:"lala",author:userInstance).save(flush:true, failOnError:true)
+            UserRole.create(userInstance, groupEveryone, true)
+            new Message(messageContent:"Message de test",author:userInstance).save(flush:true, failOnError:true)
+            UserRole.create(userInstance,groupEveryone,true)
         }
        Message.list().each{
            Message messageInstance ->

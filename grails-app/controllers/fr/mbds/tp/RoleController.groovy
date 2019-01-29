@@ -17,10 +17,15 @@ class RoleController {
     }
 
     def show(Long id) {
-        respond roleService.get(id)
+        def roleInstance = Role.get(id)
+        def userRoleList = UserRole.findAllByRole(roleInstance)
+        def userList = userRoleList.collect{ it.user }
+
+        respond roleService.get(id), model: [role:roleInstance, userList:userList]
     }
 
     def create() {
+        def userList = User.findAll()
         respond new Role(params)
     }
 
@@ -65,7 +70,7 @@ class RoleController {
 
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.updated.message', args: [message(code: 'role.label', default: 'Role'), role.id])
+                flash.message = "Le rôle a été mis à jour"
                 redirect role
             }
             '*'{ respond role, [status: OK] }
@@ -82,7 +87,7 @@ class RoleController {
 
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'role.label', default: 'Role'), id])
+                flash.message = "Le rôle a bien été supprimé"
                 redirect action:"index", method:"GET"
             }
             '*'{ render status: NO_CONTENT }
@@ -92,7 +97,7 @@ class RoleController {
     protected void notFound() {
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.not.found.message', args: [message(code: 'role.label', default: 'Role'), params.id])
+                flash.message = "Le role n'a pas été trouvé"
                 redirect action: "index", method: "GET"
             }
             '*'{ render status: NOT_FOUND }

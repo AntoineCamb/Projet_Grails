@@ -1,6 +1,7 @@
 package fr.mbds.tp
 
 import grails.plugin.springsecurity.annotation.Secured
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import static org.springframework.http.HttpStatus.*
 
@@ -8,6 +9,8 @@ import static org.springframework.http.HttpStatus.*
 class MessageController {
 
     MessageService messageService
+
+    SpringSecurityService springSecurityService
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
@@ -26,6 +29,10 @@ class MessageController {
 
     def create() {
         respond new Message(params)
+        def userList = User.findAll()
+        def roleList = Role.findAll()
+
+        respond new Message(params), model: [userList: userList, roleList: roleList]
     }
 
     def save(Message message) {
@@ -39,6 +46,20 @@ class MessageController {
         } catch (ValidationException e) {
             respond message.errors, view:'create'
             return
+        }
+
+        if (params.get("destinataires")) {
+            def destinatairesList = User.getAll(params.list("destinataires"))
+            destinatairesList.each {
+                new UserMessage(user: it, message: message).save(flush: true)
+            }
+        }
+
+        if (params.get("groupedestinataire")) {
+            def groupeList = Role.getAll(params.list("groupedestinataire"))
+            groupeList.each {
+                new UserMessage(user:it, message:message).save(flush:true)
+            }
         }
 
         request.withFormat {
@@ -55,9 +76,9 @@ class MessageController {
     }
 
     def update(Message message) {
-                if (message == null) {
+        if (message == null) {
             notFound()
-            return
+        return
         }
 
         try {
@@ -97,7 +118,7 @@ class MessageController {
 
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'message.label', default: 'Message'), id])
+                flash.message = "Le message avec l'id ${message.id} a bien été supprimé"
                 redirect action:"index", method:"GET"
             }
             '*'{ render status: NO_CONTENT }
@@ -107,7 +128,7 @@ class MessageController {
     protected void notFound() {
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.not.found.message', args: [message(code: 'message.label', default: 'Message'), params.id])
+                flash.message = "Le message avec l'id ${message.id} n'a pas été trouvé"
                 redirect action: "index", method: "GET"
             }
             '*'{ render status: NOT_FOUND }
